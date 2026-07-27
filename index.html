@@ -242,7 +242,7 @@ body:not(.edit-mode) [contenteditable="true"]{box-shadow:none!important;backgrou
 .section-width-controls output{color:var(--cyan-deep);font-weight:800;font-variant-numeric:tabular-nums}
 .section-width-controls input[type="range"]{display:block;width:100%;height:30px;margin:.25rem 0 .55rem;padding:0;border:0;background:transparent;accent-color:var(--cyan);box-shadow:none}
 .section-width-controls .edit-btn{margin:0}
-section>.w{max-width:var(--section-width,var(--maxw))}
+section>.w{width:100%;max-width:var(--section-width,var(--maxw));margin-left:var(--section-left-gap,auto);margin-right:var(--section-right-gap,auto)}
 body.edit-mode .font-resize-selected{box-shadow:0 0 0 3px rgba(10,166,189,.34)!important;background:rgba(10,166,189,.08)!important}
 body.edit-mode .map-node text{cursor:grab;pointer-events:auto;touch-action:none;user-select:none;paint-order:stroke;stroke:rgba(255,255,255,.88);stroke-width:4px;stroke-linejoin:round}
 body.edit-mode .map-node text:active{cursor:grabbing}
@@ -710,7 +710,9 @@ body.can-edit .team-member-remove{display:inline-flex}
         <select id="sectionWidthTarget" aria-label="Section to resize"><option value="home">Title</option><option value="mission" selected>Mission and values</option><option value="why">Why Hydro-Sense</option><option value="unique">Platform</option><option value="story">Mission log</option><option value="team">Team</option><option value="careers">Careers</option><option value="contact">Contact</option><option value="investors">Investors</option></select>
         <label for="sectionWidthRange"><span>Content width</span><output id="sectionWidthOutput">1440 px</output></label>
         <input id="sectionWidthRange" type="range" min="640" max="1800" step="10" value="1440">
-        <button class="edit-btn active" id="sectionWidthReset" type="button">Reset selected width</button>
+        <label for="sectionPlacementRange"><span>Content placement</span><output id="sectionPlacementOutput">Centre</output></label>
+        <input id="sectionPlacementRange" type="range" min="0" max="100" step="1" value="50">
+        <button class="edit-btn active" id="sectionWidthReset" type="button">Reset selected layout</button>
       </div>
       <label class="setting-row"><span>Colour palette<small>Light, dark or brand-guideline blue</small></span><select id="themeMode" class="contact-layout-select"><option value="light">Light</option><option value="dark">Dark</option><option value="brand" selected="selected">Brand blue</option></select></label>
       <label class="setting-row"><span>Contact layout<small>Static form or Contact us overlay</small></span><select id="contactLayoutMode" class="contact-layout-select"><option value="fullscreen" selected="selected">Contact us overlay</option><option value="static">Static form</option></select></label>
@@ -1279,18 +1281,37 @@ function validEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}document.que
   "use strict";
   var target=document.getElementById('sectionWidthTarget'),range=document.getElementById('sectionWidthRange');
   var output=document.getElementById('sectionWidthOutput'),reset=document.getElementById('sectionWidthReset');
-  if(!target||!range||!output||!reset)return;
+  var placement=document.getElementById('sectionPlacementRange'),placementOutput=document.getElementById('sectionPlacementOutput');
+  if(!target||!range||!output||!reset||!placement||!placementOutput)return;
   var KEY='hs_section_widths';
+  var PLACEMENT_KEY='hs_section_placements';
   function section(){return document.getElementById(target.value);}
   function read(){try{return JSON.parse(localStorage.getItem(KEY)||'{}')||{};}catch(e){return{};}}
   function write(values){try{localStorage.setItem(KEY,JSON.stringify(values));}catch(e){}}
+  function readPlacements(){try{return JSON.parse(localStorage.getItem(PLACEMENT_KEY)||'{}')||{};}catch(e){return{};}}
+  function writePlacements(values){try{localStorage.setItem(PLACEMENT_KEY,JSON.stringify(values));}catch(e){}}
   function currentWidth(el){
     var inline=parseInt(el&&el.style.getPropertyValue('--section-width'),10);
     return inline||1440;
   }
   function refresh(){
-    var el=section(),width=currentWidth(el);
+    var el=section(),width=currentWidth(el),position=parseInt(el&&el.style.getPropertyValue('--section-placement'),10);
+    if(!Number.isFinite(position))position=50;
     range.value=Math.max(640,Math.min(1800,width));output.textContent=width+' px';
+    placement.value=Math.max(0,Math.min(100,position));updatePlacementOutput(position);positionSection(el);
+  }
+  function updatePlacementOutput(position){
+    position=Math.max(0,Math.min(100,parseInt(position,10)||0));
+    placementOutput.textContent=position===0?'Left':position===50?'Centre':position===100?'Right':position+'%';
+  }
+  function positionSection(el){
+    if(!el)return;
+    var wrapper=el.querySelector(':scope > .w');if(!wrapper)return;
+    var position=parseInt(el.style.getPropertyValue('--section-placement'),10);if(!Number.isFinite(position))position=50;
+    el.style.setProperty('--section-left-gap','0px');el.style.setProperty('--section-right-gap','0px');
+    var spare=Math.max(0,el.clientWidth-wrapper.getBoundingClientRect().width);
+    var left=Math.round(spare*Math.max(0,Math.min(100,position))/100);
+    el.style.setProperty('--section-left-gap',left+'px');el.style.setProperty('--section-right-gap',(spare-left)+'px');
   }
   function apply(width,publish){
     var el=section();if(!el)return;
@@ -1298,17 +1319,33 @@ function validEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}document.que
     el.style.setProperty('--section-width',width+'px');
     var values=read();values[target.value]=width;write(values);
     range.value=width;output.textContent=width+' px';
+    positionSection(el);
+    if(publish&&window.__hsSchedulePublish)window.__hsSchedulePublish();
+  }
+  function applyPlacement(position,publish){
+    var el=section();if(!el)return;
+    position=Math.max(0,Math.min(100,parseInt(position,10)));if(!Number.isFinite(position))position=50;
+    el.style.setProperty('--section-placement',position);
+    var values=readPlacements();values[target.value]=position;writePlacements(values);
+    placement.value=position;updatePlacementOutput(position);positionSection(el);
     if(publish&&window.__hsSchedulePublish)window.__hsSchedulePublish();
   }
   var saved=read();
   Object.keys(saved).forEach(function(id){var el=document.getElementById(id);if(el)el.style.setProperty('--section-width',Math.max(640,Math.min(1800,parseInt(saved[id],10)||1440))+'px');});
+  var savedPlacements=readPlacements();
+  Object.keys(savedPlacements).forEach(function(id){var el=document.getElementById(id),position=Math.max(0,Math.min(100,parseInt(savedPlacements[id],10)));if(el&&Number.isFinite(position))el.style.setProperty('--section-placement',position);});
   target.addEventListener('change',refresh);
   range.addEventListener('input',function(){apply(range.value,true);});
+  placement.addEventListener('input',function(){applyPlacement(placement.value,true);});
   reset.addEventListener('click',function(){
-    var el=section();if(el)el.style.removeProperty('--section-width');
+    var el=section();if(el){el.style.removeProperty('--section-width');el.style.removeProperty('--section-placement');}
     var values=read();delete values[target.value];write(values);refresh();
+    var placements=readPlacements();delete placements[target.value];writePlacements(placements);
     if(window.__hsSchedulePublish)window.__hsSchedulePublish();
   });
+  function positionAll(){document.querySelectorAll('section').forEach(positionSection);}
+  window.addEventListener('resize',positionAll);
+  requestAnimationFrame(positionAll);
   refresh();
 })();
 </script>
