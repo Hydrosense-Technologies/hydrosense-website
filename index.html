@@ -235,7 +235,8 @@ body:not(.edit-mode) [contenteditable="true"]{box-shadow:none!important;backgrou
 .text-size-controls input[type="range"]{display:block;width:100%;height:30px;margin:.35rem 0 .55rem;padding:0;border:0;background:transparent;accent-color:var(--cyan);box-shadow:none}
 .text-size-controls .edit-btn{margin:0}
 body.edit-mode .font-resize-selected{box-shadow:0 0 0 3px rgba(10,166,189,.34)!important;background:rgba(10,166,189,.08)!important}
-body.edit-mode .map-node text{cursor:pointer;pointer-events:auto;paint-order:stroke;stroke:rgba(255,255,255,.88);stroke-width:4px;stroke-linejoin:round}
+body.edit-mode .map-node text{cursor:grab;pointer-events:auto;touch-action:none;user-select:none;paint-order:stroke;stroke:rgba(255,255,255,.88);stroke-width:4px;stroke-linejoin:round}
+body.edit-mode .map-node text:active{cursor:grabbing}
 body.edit-mode .map-node text:hover,body.edit-mode .map-node text.font-resize-selected{fill:var(--cyan-deep)!important;filter:drop-shadow(0 0 5px rgba(10,166,189,.7))}
 
 body.dark-mode{--paper:#07141c;--sand:#091923;--ink:#eaf7fb;--ink-2:#c7dce5;--mut:#8caab6;--hair:#193442;--hair-2:#254a5b;--card:#0d1f2a;--cyan:#20c6df;--cyan-deep:#72e1f1;--cyan-soft:#7fe8f5;background:#07141c;color:#eaf7fb}
@@ -1119,9 +1120,40 @@ function validEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}document.que
     if(target)selectTextNode(target);
   });
   document.querySelectorAll(svgStoryTextSelector).forEach(function(label){
+    var dragged=false,dragging=false,startPoint=null,startX=0,startY=0,pointerId=null;
+    function localPoint(event){
+      var svg=label.ownerSVGElement,point=svg.createSVGPoint();
+      point.x=event.clientX;point.y=event.clientY;
+      var matrix=label.parentNode.getScreenCTM();
+      return matrix?point.matrixTransform(matrix.inverse()):point;
+    }
+    label.addEventListener('pointerdown',function(e){
+      if(!document.body.classList.contains('edit-mode'))return;
+      e.preventDefault();e.stopPropagation();selectTextNode(label);
+      dragging=true;dragged=false;pointerId=e.pointerId;startPoint=localPoint(e);
+      startX=parseFloat(label.getAttribute('x'))||0;startY=parseFloat(label.getAttribute('y'))||0;
+      label.setPointerCapture(pointerId);
+    });
+    label.addEventListener('pointermove',function(e){
+      if(!dragging||e.pointerId!==pointerId)return;
+      var point=localPoint(e),dx=point.x-startPoint.x,dy=point.y-startPoint.y;
+      if(Math.abs(dx)>2||Math.abs(dy)>2)dragged=true;
+      if(!dragged)return;
+      label.setAttribute('x',(startX+dx).toFixed(1));label.setAttribute('y',(startY+dy).toFixed(1));
+    });
+    function finishDrag(e){
+      if(!dragging||e.pointerId!==pointerId)return;
+      dragging=false;
+      try{label.releasePointerCapture(pointerId);}catch(err){}
+      pointerId=null;
+      if(dragged&&window.__hsSchedulePublish)window.__hsSchedulePublish();
+    }
+    label.addEventListener('pointerup',finishDrag);
+    label.addEventListener('pointercancel',finishDrag);
     label.addEventListener('click',function(e){
       if(!document.body.classList.contains('edit-mode'))return;
       e.preventDefault();e.stopPropagation();selectTextNode(label);
+      if(dragged){dragged=false;return;}
       var current=(label.textContent||'').trim();
       var replacement=window.prompt('Edit animated story label:',current);
       if(replacement===null)return;
