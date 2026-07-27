@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" style="--header-height: 81px;"><grammarly-extension data-grammarly-shadow-root="true" class="dnXmp" style="visibility: visible !important; position: absolute; top: 0px; left: 0px; pointer-events: none; --rem: 16;"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" class="dnXmp" style="visibility: visible !important; position: absolute; top: 0px; left: 0px; pointer-events: none; --rem: 16;"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" class="dnXmp" style="visibility: visible !important; position: absolute; top: 0px; left: 0px; pointer-events: none; --rem: 16;"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" class="dnXmp" style="visibility: visible !important; position: absolute; top: 0px; left: 0px; pointer-events: none; --rem: 16;"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" class="dnXmp" style="visibility: visible !important; position: absolute; top: 0px; left: 0px; pointer-events: none; --rem: 16;"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" class="dnXmp" style="visibility: visible !important; position: absolute; top: 0px; left: 0px; pointer-events: none; --rem: 16;"></grammarly-extension><head>
+<html lang="en" style="--header-height: 81px;"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="Hydro-Sense Technologies — autonomous, whole-of-water quality monitoring. One USV surveys the entire catchment and streams calibrated data live.">
@@ -622,7 +622,7 @@ body.brand-mode [contenteditable="true"]:hover{background:rgba(170,229,248,.12)!
 
 </style>
 <style></style></head>
-<body class="contact-fullscreen brand-mode dashboard-embed-mode" data-route-pattern="lawnmower" data-theme="brand" data-scholarcy-content-script-executed="1" data-new-gr-c-s-check-loaded="14.1311.0" data-gr-ext-installed="" data-new-gr-c-s-loaded="14.1311.0">
+<body class="contact-fullscreen brand-mode dashboard-embed-mode" data-route-pattern="lawnmower" data-theme="brand">
 
 <div class="site-settings" id="siteSettings" data-no-edit="">
   <button class="settings-toggle" id="settingsToggle" type="button" aria-expanded="true" aria-controls="settingsPanel">⚙ Editor</button>
@@ -1758,6 +1758,12 @@ function validEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}document.que
     var root=document.documentElement.cloneNode(true);
     var body=root.querySelector('body');
     if(body){body.classList.remove('edit-mode','photo-edit-mode','editor-gate','can-edit','contact-modal-open');}
+    root.querySelectorAll('*').forEach(function(el){
+      if(/^grammarly-/i.test(el.tagName||'')){el.remove();return;}
+      Array.prototype.slice.call(el.attributes||[]).forEach(function(attr){
+        if(/^data-(?:new-gr|gr-ext|grammarly|scholarcy)/i.test(attr.name))el.removeAttribute(attr.name);
+      });
+    });
     root.querySelectorAll('[contenteditable]').forEach(function(el){el.setAttribute('contenteditable','false');el.removeAttribute('spellcheck');});
     root.querySelectorAll('[data-runtime-only]').forEach(function(el){el.remove();});
     root.querySelectorAll('.photo-avatar,.official-logo,.dashboard-image').forEach(function(el){
@@ -1836,5 +1842,5 @@ function validEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}document.que
 
 
 
-<grammarly-desktop-integration data-grammarly-shadow-root="true" style="visibility: visible !important;"></grammarly-desktop-integration>
-</body><grammarly-popups data-grammarly-shadow-root="true" class="dnXmp" style="visibility: visible !important; --rem: 16;"></grammarly-popups><grammarly-anchored-card-view role="presentation" data-grammarly-ignore-keyboard-events="true" style="pointer-events: none; z-index: 2147483646; --rem: 16;" data-grammarly-shadow-root="true" class="dnXmp"></grammarly-anchored-card-view><grammarly-extension-vbars data-grammarly-shadow-root="true" class="dnXmp" style="visibility: visible !important; display: contents; --rem: 16;"></grammarly-extension-vbars><grammarly-extension-vbar-card data-grammarly-shadow-root="true" class="dnXmp" style="visibility: visible !important; --rem: 16;"></grammarly-extension-vbar-card><grammarly-extension-vbars-feedback-form data-grammarly-shadow-root="true" class="dnXmp" style="visibility: visible !important; --rem: 16;"></grammarly-extension-vbars-feedback-form><grammarly-popups data-grammarly-shadow-root="true" class="dnXmp" style="visibility: visible !important; --rem: 16;"></grammarly-popups><grammarly-anchored-card-view role="presentation" data-grammarly-ignore-keyboard-events="true" style="pointer-events: none; z-index: 2147483646; --rem: 16;" data-grammarly-shadow-root="true" class="dnXmp"></grammarly-anchored-card-view><grammarly-popups data-grammarly-shadow-root="true" class="dnXmp" style="visibility: visible !important; --rem: 16;"></grammarly-popups><grammarly-anchored-card-view role="presentation" data-grammarly-ignore-keyboard-events="true" style="pointer-events: none; z-index: 2147483646; --rem: 16;" data-grammarly-shadow-root="true" class="dnXmp"></grammarly-anchored-card-view><grammarly-extension-vbars data-grammarly-shadow-root="true" class="dnXmp" style="visibility: visible !important; display: contents; --rem: 16;"></grammarly-extension-vbars><grammarly-extension-vbar-card data-grammarly-shadow-root="true" class="dnXmp" style="visibility: visible !important; --rem: 16;"></grammarly-extension-vbar-card><grammarly-extension-vbars-feedback-form data-grammarly-shadow-root="true" class="dnXmp" style="visibility: visible !important; --rem: 16;"></grammarly-extension-vbars-feedback-form><grammarly-extension-vbars data-grammarly-shadow-root="true" class="dnXmp" style="visibility: visible !important; display: contents; --rem: 16;"></grammarly-extension-vbars><grammarly-extension-vbar-card data-grammarly-shadow-root="true" class="dnXmp" style="visibility: visible !important; --rem: 16;"></grammarly-extension-vbar-card><grammarly-extension-vbars-feedback-form data-grammarly-shadow-root="true" class="dnXmp" style="visibility: visible !important; --rem: 16;"></grammarly-extension-vbars-feedback-form></html>
+
+</body></html>
