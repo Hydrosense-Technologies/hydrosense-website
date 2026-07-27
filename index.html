@@ -991,7 +991,17 @@ function updateMap(){
 }
 var savedRoutePattern=null;try{savedRoutePattern=localStorage.getItem('hs_route_pattern');}catch(e){}applyRoutePattern(savedRoutePattern||document.body.getAttribute('data-route-pattern')||(routePublic&&routePublic.value)||(routeSelect&&routeSelect.value)||'current');addEventListener("scroll",updateMap,{passive:true});addEventListener("resize",function(){init();updateMap();});updateMap();
 var revs=document.querySelectorAll(".up");if(reduce||!("IntersectionObserver" in window)){revs.forEach(function(r){r.classList.add("in");});}else{var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target);}});},{threshold:.15});revs.forEach(function(r){io.observe(r);});}
-function wireAccordion(container){if(!container)return;container.querySelectorAll(".exp").forEach(function(card){var btn=card.querySelector(".exp-btn"),body=card.querySelector(".exp-body");btn.addEventListener("click",function(){var open=card.classList.toggle("open");btn.setAttribute("aria-expanded",open);body.style.height=open?body.scrollHeight+"px":"0px";});});addEventListener("resize",function(){container.querySelectorAll(".exp.open .exp-body").forEach(function(b){b.style.height=b.scrollHeight+"px";});});}
+function equaliseCareerCards(){
+  var grid=document.getElementById('careersGrid');if(!grid)return;
+  var cards=[].slice.call(grid.querySelectorAll('.exp'));
+  cards.forEach(function(card){card.style.minHeight='';});
+  if(innerWidth<=900)return;
+  var openCards=cards.filter(function(card){return card.classList.contains('open');});
+  if(openCards.length<2)return;
+  var tallest=Math.max.apply(null,openCards.map(function(card){return Math.ceil(card.getBoundingClientRect().height);}));
+  openCards.forEach(function(card){card.style.minHeight=tallest+'px';});
+}
+function wireAccordion(container){if(!container)return;container.querySelectorAll(".exp").forEach(function(card){var btn=card.querySelector(".exp-btn"),body=card.querySelector(".exp-body");btn.addEventListener("click",function(){var open=card.classList.toggle("open");btn.setAttribute("aria-expanded",open);body.style.height=open?body.scrollHeight+"px":"0px";if(container.id==='careersGrid'){requestAnimationFrame(equaliseCareerCards);setTimeout(equaliseCareerCards,320);}});});addEventListener("resize",function(){container.querySelectorAll(".exp.open .exp-body").forEach(function(b){b.style.height=b.scrollHeight+"px";});if(container.id==='careersGrid')equaliseCareerCards();});if(container.id==='careersGrid')requestAnimationFrame(equaliseCareerCards);}
 wireAccordion(document.getElementById("uniqueGrid"));wireAccordion(document.getElementById("careersGrid"));
 /* careers: collapsed accordions revealing description + tags + apply-mailto button (no in-page form) */
 function validEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}document.querySelectorAll("form.w3form").forEach(function(form){var statusEl=form.querySelector("[data-status]"),submitBtn=form.querySelector("[data-submit]");function showStatus(t,m){if(statusEl){statusEl.className="form-status show "+t;statusEl.textContent=m;}}form.querySelectorAll("input,select,textarea").forEach(function(f){f.addEventListener("input",function(){f.classList.remove("invalid");});});form.addEventListener("submit",function(e){e.preventDefault();if(form.querySelector('input[name="botcheck"]')&&form.querySelector('input[name="botcheck"]').checked)return;var firstBad=null;form.querySelectorAll("[required]").forEach(function(el){var bad=!el.value.trim()||(el.type==="email"&&!validEmail(el.value));el.classList.toggle("invalid",bad);if(bad&&!firstBad)firstBad=el;});if(firstBad){showStatus("err","Please complete the highlighted fields.");firstBad.focus();return;}submitBtn.disabled=true;var orig=submitBtn.innerHTML;submitBtn.textContent="Sending…";showStatus("ok","Sending…");fetch("https://api.web3forms.com/submit",{method:"POST",headers:{Accept:"application/json"},body:new FormData(form)}).then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j};});}).then(function(res){if(res.ok&&res.j.success){showStatus("ok","Thanks — we've received it and will be in touch shortly.");form.reset();}else{showStatus("err",(res.j&&res.j.message)||"Something went wrong. Please email us directly.");}}).catch(function(){showStatus("err","Network error — please email info@hydrosensetechnologies.com.au instead.");}).finally(function(){submitBtn.disabled=false;submitBtn.innerHTML=orig;});});});
@@ -2074,6 +2084,7 @@ function validEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}document.que
     });
     root.querySelectorAll('[contenteditable]').forEach(function(el){el.setAttribute('contenteditable','false');el.removeAttribute('spellcheck');});
     root.querySelectorAll('.font-resize-selected').forEach(function(el){el.classList.remove('font-resize-selected');});
+    root.querySelectorAll('#careersGrid .exp').forEach(function(el){el.style.removeProperty('min-height');});
     root.querySelectorAll('[data-runtime-only]').forEach(function(el){el.remove();});
     root.querySelectorAll('.photo-avatar,.official-logo,.dashboard-image').forEach(function(el){
       el.removeAttribute('tabindex');
