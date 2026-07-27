@@ -166,7 +166,10 @@ body{background:#fff}
 
 /* ---------- v10 corrections: no label card, blue/white palette, fractal reservoir, proper USV ---------- */
 :root{--paper:#fbfdff;--paper-2:#f3f9ff;--green:#78bde7;--sand:#f7fbff;--shore:#edf8ff;--water:#c9eefb;--water-2:#8ecfe7;--hair:#d7eaf5;--hair-2:#c4deed;--card:rgba(255,255,255,.86)}
-.hero:before{background:radial-gradient(60% 68% at 74% 12%,rgba(10,166,189,.16),transparent 62%),radial-gradient(48% 58% at 10% 28%,rgba(45,143,210,.10),transparent 68%)!important}.hero-map-card{background:linear-gradient(145deg,#ffffff,#edf8ff)!important}.hero-map-card .tag,.scroll-meter{display:none!important}.catchment-scroll{background:#f7fbff!important}.catchment-stage{background:linear-gradient(135deg,#ffffff 0%,#f5fbff 46%,#eaf7ff 100%)!important}.catchment-stage:before{background:radial-gradient(62% 60% at 45% 42%,rgba(10,166,189,.11),transparent 70%),radial-gradient(50% 70% at 16% 72%,rgba(45,143,210,.08),transparent 65%)!important}.catchment-stage:after{opacity:.14!important}.map-node .halo{display:none!important}.route-ghost{stroke:rgba(8,127,189,.24)!important;stroke-width:3.8!important;stroke-dasharray:11 10!important;stroke-linecap:round!important;stroke-linejoin:round!important}.route-live{stroke:#0aaed0!important;stroke-width:4.4!important;stroke-linecap:round!important;stroke-linejoin:round!important}.route-soft{stroke-width:0!important;opacity:0!important;stroke-linecap:round!important;stroke-linejoin:round!important}.dock{fill:#93aebf!important}.usv-pontoon{fill:#fafdff;stroke:#08222d;stroke-width:3;stroke-linejoin:round}.usv-deck{fill:#ffffff;stroke:#08222d;stroke-width:3;stroke-linejoin:round}.usv-crossbar{stroke:#08222d;stroke-width:4;stroke-linecap:round}.usv-mast{stroke:#08222d;stroke-width:3.2;stroke-linecap:round}.usv-sensor{fill:#0aaed0;stroke:#ffffff;stroke-width:1.4}.usv-solar{fill:#235b6b;stroke:#dffaff;stroke-width:1.6}.usv-dark{fill:#0e2a35}.usv-label{display:none!important}.radar-rings{display:none!important;pointer-events:none}
+.hero:before{background:radial-gradient(60% 68% at 74% 12%,rgba(10,166,189,.16),transparent 62%),radial-gradient(48% 58% at 10% 28%,rgba(45,143,210,.10),transparent 68%)!important}.hero-map-card{background:linear-gradient(145deg,#ffffff,#edf8ff)!important}.hero-map-card .tag,.scroll-meter{display:none!important}.catchment-scroll{background:#f7fbff!important}.catchment-stage{background:linear-gradient(135deg,#ffffff 0%,#f5fbff 46%,#eaf7ff 100%)!important}.catchment-stage:before{background:radial-gradient(62% 60% at 45% 42%,rgba(10,166,189,.11),transparent 70%),radial-gradient(50% 70% at 16% 72%,rgba(45,143,210,.08),transparent 65%)!important}.catchment-stage:after{opacity:.14!important}.map-node .halo{display:none!important}.route-ghost{stroke:rgba(8,127,189,.24)!important;stroke-width:3.8!important;stroke-dasharray:11 10!important;stroke-linecap:round!important;stroke-linejoin:round!important}.route-live{stroke:#0aaed0!important;stroke-width:4.4!important;stroke-linecap:round!important;stroke-linejoin:round!important}.route-soft{stroke-width:0!important;opacity:0!important;stroke-linecap:round!important;stroke-linejoin:round!important}.dock{fill:#93aebf!important}.usv-pontoon{fill:#fafdff;stroke:#08222d;stroke-width:3;stroke-linejoin:round}.usv-deck{fill:#ffffff;stroke:#08222d;stroke-width:3;stroke-linejoin:round}.usv-crossbar{stroke:#08222d;stroke-width:4;stroke-linecap:round}.usv-mast{stroke:#08222d;stroke-width:3.2;stroke-linecap:round}.usv-sensor{fill:#0aaed0;stroke:#ffffff;stroke-width:1.4}.usv-solar{fill:#235b6b;stroke:#dffaff;stroke-width:1.6}.usv-dark{fill:#0e2a35}.usv-label{display:none!important}.radar-rings{display:block!important;pointer-events:none}
+.usv-wrap .radar-rings{opacity:1}
+.usv-wrap .radar-wedge,.usv-wrap .radar-sweep,.usv-wrap .radar-origin{display:none}
+.usv-wrap .radar-ring{stroke:rgba(0,174,208,.88);stroke-width:3.2;animation-duration:1.8s}
 
 /* ---------- v11 correction: remove start hero preview card ---------- */
 .hero-grid{grid-template-columns:minmax(0,1fr)!important;max-width:980px;}
@@ -228,6 +231,10 @@ footer .official-logo{height:48px;width:48px;max-width:none}
 body.edit-mode [contenteditable="true"]{cursor:text}
 body.edit-mode [contenteditable="true"]:empty:before{content:"Type here";color:rgba(95,122,134,.62)}
 body:not(.edit-mode) [contenteditable="true"]{box-shadow:none!important;background:transparent!important}
+body.editor-gate .map-node:not(.aquavision-end){cursor:grab;pointer-events:bounding-box;touch-action:none}
+body.editor-gate .map-node:not(.aquavision-end):active{cursor:grabbing}
+body.editor-gate .map-node:not(.aquavision-end) circle.core{filter:drop-shadow(0 0 6px rgba(10,166,189,.75))}
+body.editor-gate:not(.edit-mode) .catchment-stage .panel{pointer-events:none}
 
 body.dark-mode{--paper:#07141c;--sand:#091923;--ink:#eaf7fb;--ink-2:#c7dce5;--mut:#8caab6;--hair:#193442;--hair-2:#254a5b;--card:#0d1f2a;--cyan:#20c6df;--cyan-deep:#72e1f1;--cyan-soft:#7fe8f5;background:#07141c;color:#eaf7fb}
 body.dark-mode main,body.dark-mode .hero{background:#07141c!important}
@@ -933,6 +940,57 @@ function wireAccordion(container){if(!container)return;container.querySelectorAl
 wireAccordion(document.getElementById("uniqueGrid"));wireAccordion(document.getElementById("careersGrid"));
 /* careers: collapsed accordions revealing description + tags + apply-mailto button (no in-page form) */
 function validEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}document.querySelectorAll("form.w3form").forEach(function(form){var statusEl=form.querySelector("[data-status]"),submitBtn=form.querySelector("[data-submit]");function showStatus(t,m){if(statusEl){statusEl.className="form-status show "+t;statusEl.textContent=m;}}form.querySelectorAll("input,select,textarea").forEach(function(f){f.addEventListener("input",function(){f.classList.remove("invalid");});});form.addEventListener("submit",function(e){e.preventDefault();if(form.querySelector('input[name="botcheck"]')&&form.querySelector('input[name="botcheck"]').checked)return;var firstBad=null;form.querySelectorAll("[required]").forEach(function(el){var bad=!el.value.trim()||(el.type==="email"&&!validEmail(el.value));el.classList.toggle("invalid",bad);if(bad&&!firstBad)firstBad=el;});if(firstBad){showStatus("err","Please complete the highlighted fields.");firstBad.focus();return;}submitBtn.disabled=true;var orig=submitBtn.innerHTML;submitBtn.textContent="Sending…";showStatus("ok","Sending…");fetch("https://api.web3forms.com/submit",{method:"POST",headers:{Accept:"application/json"},body:new FormData(form)}).then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j};});}).then(function(res){if(res.ok&&res.j.success){showStatus("ok","Thanks — we've received it and will be in touch shortly.");form.reset();}else{showStatus("err",(res.j&&res.j.message)||"Something went wrong. Please email us directly.");}}).catch(function(){showStatus("err","Network error — please email info@hydrosensetechnologies.com.au instead.");}).finally(function(){submitBtn.disabled=false;submitBtn.innerHTML=orig;});});});
+})();
+</script>
+
+<script>
+/* Editor: drag storyboard checkpoints while keeping them snapped to the USV route. */
+(function(){
+  "use strict";
+  var route=document.getElementById('routeLive');
+  var nodes=[].slice.call(document.querySelectorAll('#mapGroup .map-node:not(.aquavision-end)'));
+  if(!route||!nodes.length)return;
+  nodes.forEach(function(node){
+    node.parentNode.appendChild(node);
+    var hit=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    hit.setAttribute('r','28');hit.setAttribute('fill','transparent');hit.setAttribute('class','checkpoint-drag-hit');hit.setAttribute('data-runtime-only','');
+    node.insertBefore(hit,node.firstChild);
+  });
+  function closestPosition(clientX,clientY){
+    var length=route.getTotalLength(),matrix=route.getScreenCTM(),best=0,bestDistance=Infinity,samples=420;
+    if(!matrix)return 0;
+    for(var i=0;i<=samples;i++){
+      var fraction=i/samples,point=route.getPointAtLength(length*fraction);
+      var x=matrix.a*point.x+matrix.c*point.y+matrix.e,y=matrix.b*point.x+matrix.d*point.y+matrix.f;
+      var distance=(x-clientX)*(x-clientX)+(y-clientY)*(y-clientY);
+      if(distance<bestDistance){bestDistance=distance;best=fraction;}
+    }
+    return best;
+  }
+  function place(node,fraction){
+    var length=route.getTotalLength(),point=route.getPointAtLength(length*fraction);
+    node.setAttribute('transform','translate('+point.x.toFixed(1)+' '+point.y.toFixed(1)+')');
+    node.dataset.at=(fraction*.48).toFixed(3);
+  }
+  nodes.forEach(function(node){
+    var pointerId=null,moved=false;
+    node.setAttribute('title','Drag this checkpoint along the USV route');
+    node.addEventListener('pointerdown',function(e){
+      if(!document.body.classList.contains('editor-gate'))return;
+      e.preventDefault();e.stopPropagation();pointerId=e.pointerId;moved=false;node.setPointerCapture(pointerId);
+    });
+    node.addEventListener('pointermove',function(e){
+      if(pointerId===null||e.pointerId!==pointerId)return;
+      e.preventDefault();moved=true;place(node,closestPosition(e.clientX,e.clientY));
+    });
+    function finish(e){
+      if(pointerId===null||e.pointerId!==pointerId)return;
+      try{node.releasePointerCapture(pointerId);}catch(err){}
+      pointerId=null;
+      if(moved&&window.__hsSchedulePublish)window.__hsSchedulePublish();
+    }
+    node.addEventListener('pointerup',finish);node.addEventListener('pointercancel',finish);
+  });
 })();
 </script>
 
