@@ -620,6 +620,35 @@ body.brand-mode .edit-btn.active{background:#fff!important;color:#034e8f!importa
 body.brand-mode .section-order-item,body.brand-mode .section-order-actions button{background:#fff!important;color:#034e8f!important;border-color:#aae5f8!important}
 body.brand-mode [contenteditable="true"]:hover{background:rgba(170,229,248,.12)!important}body.brand-mode [contenteditable="true"]:focus{background:rgba(170,229,248,.18)!important}
 
+/* Editable statistics banner */
+.stats-banner{padding:clamp(2.2rem,4.5vw,4rem) 0;border-top:1px solid var(--hair)}
+.stats-banner .figures{margin-top:0;padding:clamp(1.5rem,3vw,2.5rem) 0;border-top:1px solid var(--hair)}
+.stats-banner .figures b{font-size:var(--stats-number-size,clamp(2.4rem,5vw,4rem));color:var(--stats-number-color,var(--cyan-deep))}
+.stats-banner .figures span{font-size:var(--stats-label-size,.92rem);color:var(--stats-label-color,var(--mut))}
+.figures.stats-banner{padding:clamp(1.5rem,3vw,2.5rem) 0;margin-top:clamp(2.4rem,5vw,4rem)}
+.figures.stats-banner b{font-size:var(--stats-number-size,clamp(2.4rem,5vw,4rem));color:var(--stats-number-color,var(--cyan-deep))}
+.figures.stats-banner span{font-size:var(--stats-label-size,.92rem);color:var(--stats-label-color,var(--mut))}
+.stats-editor-controls{margin-top:1rem;padding:1rem;border:1px solid var(--hair);border-radius:14px;background:var(--card)}
+.stats-editor-controls h4{margin:0 0 .75rem}
+.stat-style-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-top:.8rem}
+.stat-style-field{font-size:.75rem;font-weight:750;color:var(--mut);margin:0}
+.stat-style-field output{float:right;color:var(--ink);font-variant-numeric:tabular-nums}
+.stat-style-field input[type="range"]{display:block;width:100%;height:28px;margin:.25rem 0 0;padding:0;border:0;background:transparent;accent-color:var(--cyan)}
+.stat-style-field input[type="color"]{display:block;width:100%;height:38px;margin:.25rem 0 0;padding:3px;border:1px solid var(--hair-2);border-radius:9px;background:#fff;cursor:pointer}
+.stats-editor-controls .edit-btn{margin-top:.8rem}
+.team-editor-tools{margin-top:1rem;padding-top:1rem;border-top:1px solid var(--hair)}
+.team-editor-tools{display:flex;flex-wrap:wrap;gap:.55rem}
+.team-editor-tools .edit-btn{margin:0;flex:1 1 150px}
+.team-editor-status{min-height:1.2em;margin-top:.45rem;color:var(--mut);font-size:.72rem}
+.team-section-tools{margin:-1.2rem 0 2rem}
+.team-section-tools .edit-btn{width:auto;display:inline-flex;margin:0 .45rem .45rem 0;padding:.7rem 1rem;box-shadow:0 12px 28px -20px rgba(11,28,38,.55)}
+.edit-btn:disabled{opacity:.45;cursor:not-allowed;transform:none!important}
+.member{position:relative}
+.team-member-remove{display:none;position:absolute;right:.35rem;top:.35rem;z-index:8;border:1px solid rgba(179,64,47,.35);border-radius:999px;background:rgba(255,255,255,.94);color:#a73727;padding:.38rem .65rem;font:750 .7rem var(--sans);cursor:pointer;box-shadow:0 8px 20px -14px rgba(11,28,38,.6)}
+body.can-edit .team-member-remove{display:inline-flex}
+.team-member-remove:hover{background:#fff0ed;border-color:#b3402f}
+@media(max-width:520px){.stat-style-grid{grid-template-columns:1fr}}
+
 </style>
 <style></style></head>
 <body class="contact-fullscreen brand-mode dashboard-embed-mode" data-route-pattern="lawnmower" data-theme="brand" data-scholarcy-content-script-executed="1" data-new-gr-c-s-check-loaded="14.1311.0" data-gr-ext-installed="" data-new-gr-c-s-loaded="14.1311.0">
@@ -654,6 +683,18 @@ body.brand-mode [contenteditable="true"]:hover{background:rgba(170,229,248,.12)!
       <button class="edit-btn" id="dashboardImageBtn" type="button">▧ Choose dashboard image</button>
       <div class="dashboard-embed-tools" data-no-edit=""><label for="dashboardEmbedUrl">Embedded dashboard URL</label><input id="dashboardEmbedUrl" type="url" value="https://aquavision-rho.vercel.app/" spellcheck="false"><button class="edit-btn" id="dashboardEmbedApply" type="button">Apply website URL</button><div class="dashboard-embed-status" id="dashboardEmbedStatus" role="status" aria-live="polite"></div></div>
       <div class="image-editor-note" data-no-edit=""><b>Photos and logos</b>Turn on Edit photos, then click a team photo or either Hydro-Sense logo to choose an image from your files. Drag any image’s lower-right corner to resize it.<div id="imageEditorStatus" role="status" aria-live="polite"></div></div>
+      <div class="team-editor-tools" data-no-edit><button class="edit-btn" id="teamAddBtn" type="button">＋ Add team member</button><button class="edit-btn active" id="teamUndoBtn" type="button" disabled>↶ Undo team change</button></div><div class="team-editor-status" id="teamEditorStatus" role="status" aria-live="polite"></div>
+      <div class="stats-editor-controls" data-no-edit>
+        <h4>Statistics banner</h4>
+        <label class="setting-row"><span>Show banner<small>Hide or restore the three headline statistics</small></span><input id="statsVisible" type="checkbox" checked></label>
+        <div class="stat-style-grid">
+          <label class="stat-style-field">Number size <output id="statsNumberSizeOut">64 px</output><input id="statsNumberSize" type="range" min="32" max="112" step="1" value="64"></label>
+          <label class="stat-style-field">Label size <output id="statsLabelSizeOut">15 px</output><input id="statsLabelSize" type="range" min="11" max="36" step="1" value="15"></label>
+          <label class="stat-style-field">Number colour<input id="statsNumberColor" type="color" value="#087f91"></label>
+          <label class="stat-style-field">Label colour<input id="statsLabelColor" type="color" value="#5f7a86"></label>
+        </div>
+        <button class="edit-btn active" id="statsStyleReset" type="button">Reset banner style</button>
+      </div>
     </div>
 
 
@@ -983,7 +1024,7 @@ function validEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}document.que
     '.brand-word b','.brand-word small','.nav-links a','.mobile-nav a','.nav-right .btn',
     '.ticker-item',
     '.hero .kick-text','.hero h1','.hero .lede','.hero-cta a','.hero-meta b','.hero-meta span',
-    '.section-head .kick','.section-head h2','.section-head p','.benefit h3','.benefit p',
+    '.section-head .kick','.section-head h2','.section-head p','.benefit h3','.benefit p','.figures b','.figures span',
     '.panel .label','.panel h2','.panel p','.telemetry span',
     '.dash-top b','.dash-top span','.metric span','.metric b','.metric small','.dash-note',
     '.exp-btn h3','.exp-body-inner > p','.role-card h3','.role-card p','.role-tags span',
@@ -1075,6 +1116,180 @@ function validEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}document.que
   setTheme(savedTheme||(savedDark==='1'?'dark':'light'),false);
   setEditable(false);
   setPhotoEditing(false);
+})();
+</script>
+
+<script>
+/* Editable sizing and colour for the standalone headline-statistics banner. */
+(function(){
+  "use strict";
+  var banner=document.getElementById('stats')||document.querySelector('#why .figures');
+  if(banner&&!banner.id){banner.id='stats';banner.classList.add('stats-banner');banner.setAttribute('aria-label','Hydro-Sense headline statistics');}
+  var numberSize=document.getElementById('statsNumberSize'),labelSize=document.getElementById('statsLabelSize');
+  var numberColor=document.getElementById('statsNumberColor'),labelColor=document.getElementById('statsLabelColor');
+  var numberOut=document.getElementById('statsNumberSizeOut'),labelOut=document.getElementById('statsLabelSizeOut');
+  var reset=document.getElementById('statsStyleReset');
+  if(!banner||!numberSize||!labelSize||!numberColor||!labelColor)return;
+  var KEY='hs_stats_banner_style';
+  var defaults={numberSize:'64',labelSize:'15',numberColor:'#087f91',labelColor:'#5f7a86'};
+  function cleanColour(value,fallback){return /^#[0-9a-f]{6}$/i.test(value||'')?value:fallback;}
+  function readInitial(){
+    var saved=null;
+    try{saved=JSON.parse(localStorage.getItem(KEY)||'null');}catch(e){}
+    return saved||{
+      numberSize:parseInt(banner.style.getPropertyValue('--stats-number-size'),10)||defaults.numberSize,
+      labelSize:parseInt(banner.style.getPropertyValue('--stats-label-size'),10)||defaults.labelSize,
+      numberColor:cleanColour(banner.style.getPropertyValue('--stats-number-color').trim(),defaults.numberColor),
+      labelColor:cleanColour(banner.style.getPropertyValue('--stats-label-color').trim(),defaults.labelColor)
+    };
+  }
+  function apply(state,save,publish){
+    state.numberSize=String(Math.max(32,Math.min(112,parseInt(state.numberSize,10)||64)));
+    state.labelSize=String(Math.max(11,Math.min(36,parseInt(state.labelSize,10)||15)));
+    state.numberColor=cleanColour(state.numberColor,defaults.numberColor);
+    state.labelColor=cleanColour(state.labelColor,defaults.labelColor);
+    numberSize.value=state.numberSize;labelSize.value=state.labelSize;numberColor.value=state.numberColor;labelColor.value=state.labelColor;
+    numberOut.textContent=state.numberSize+' px';labelOut.textContent=state.labelSize+' px';
+    banner.style.setProperty('--stats-number-size',state.numberSize+'px');
+    banner.style.setProperty('--stats-label-size',state.labelSize+'px');
+    banner.style.setProperty('--stats-number-color',state.numberColor);
+    banner.style.setProperty('--stats-label-color',state.labelColor);
+    if(save){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
+    if(publish&&window.__hsSchedulePublish)window.__hsSchedulePublish();
+  }
+  function fromControls(){return{numberSize:numberSize.value,labelSize:labelSize.value,numberColor:numberColor.value,labelColor:labelColor.value};}
+  [numberSize,labelSize,numberColor,labelColor].forEach(function(control){
+    control.addEventListener('input',function(){apply(fromControls(),true,true);});
+  });
+  if(reset)reset.addEventListener('click',function(){
+    banner.style.removeProperty('--stats-number-size');banner.style.removeProperty('--stats-label-size');
+    banner.style.removeProperty('--stats-number-color');banner.style.removeProperty('--stats-label-color');
+    try{localStorage.removeItem(KEY);}catch(e){}
+    numberSize.value=defaults.numberSize;labelSize.value=defaults.labelSize;numberColor.value=defaults.numberColor;labelColor.value=defaults.labelColor;
+    numberOut.textContent=defaults.numberSize+' px';labelOut.textContent=defaults.labelSize+' px';
+    if(window.__hsSchedulePublish)window.__hsSchedulePublish();
+  });
+  apply(readInitial(),false,false);
+})();
+</script>
+
+<script>
+/* Add, remove and locally preserve team members from the authenticated editor. */
+(function(){
+  "use strict";
+  var team=document.querySelector('#team .team');
+  var add=document.getElementById('teamAddBtn');
+  var undo=document.getElementById('teamUndoBtn');
+  var status=document.getElementById('teamEditorStatus');
+  if(!team||!add||!undo)return;
+  var sourceMarkup=team.innerHTML;
+  var sectionTools=document.createElement('div');
+  sectionTools.className='team-section-tools edit-only';
+  sectionTools.setAttribute('data-no-edit','');sectionTools.setAttribute('data-runtime-only','');
+  var sectionAdd=document.createElement('button');
+  sectionAdd.type='button';sectionAdd.className='edit-btn';sectionAdd.textContent='＋ Add team member';
+  var sectionUndo=document.createElement('button');
+  sectionUndo.type='button';sectionUndo.className='edit-btn active';sectionUndo.textContent='↶ Undo team change';sectionUndo.disabled=true;
+  sectionTools.appendChild(sectionAdd);sectionTools.appendChild(sectionUndo);team.parentNode.insertBefore(sectionTools,team);
+  var addButtons=[add,sectionAdd];
+  var undoButtons=[undo,sectionUndo];
+  var KEY='hs_team_members_markup_v3';
+  var PREVIOUS_KEY='hs_team_members_markup_v2';
+  var HISTORY_KEY='hs_team_undo_history_v2';
+  var undoStack=[];
+  var saveTimer=null;
+  var editSnapshot=null,editChanged=false;
+  function cleanMarkup(){
+    var clone=team.cloneNode(true);
+    clone.querySelectorAll('[data-runtime-only]').forEach(function(el){el.remove();});
+    clone.querySelectorAll('[contenteditable]').forEach(function(el){el.setAttribute('contenteditable','false');el.removeAttribute('spellcheck');});
+    clone.querySelectorAll('.photo-avatar').forEach(function(el){el.removeAttribute('tabindex');el.removeAttribute('role');el.removeAttribute('aria-label');el.removeAttribute('title');el.removeAttribute('data-photo-editor-bound');el.classList.remove('image-uploaded','size-snapped');});
+    return clone.innerHTML;
+  }
+  function updateUndoButtons(){undoButtons.forEach(function(button){button.disabled=!undoStack.length;});}
+  function persistHistory(){try{sessionStorage.setItem(HISTORY_KEY,JSON.stringify(undoStack.slice(-12)));}catch(e){}updateUndoButtons();}
+  function pushHistory(markup){
+    markup=markup||cleanMarkup();
+    if(!markup)return;
+    if(!undoStack.length||undoStack[undoStack.length-1]!==markup)undoStack.push(markup);
+    if(undoStack.length>12)undoStack.shift();
+    persistHistory();
+  }
+  function save(message){
+    try{localStorage.setItem(KEY,cleanMarkup());}catch(e){}
+    if(message&&status)status.textContent=message;
+    try{document.dispatchEvent(new CustomEvent('hs:team-changed'));}catch(e){}
+    if(window.__hsSchedulePublish)window.__hsSchedulePublish();
+  }
+  function scheduleSave(){clearTimeout(saveTimer);saveTimer=setTimeout(function(){save('Team changes saved locally. Publish to make them live.');},350);}
+  function editableFields(member){return member.querySelectorAll('h3,.role,p');}
+  function syncEditable(member){
+    var on=document.body.classList.contains('edit-mode');
+    editableFields(member).forEach(function(el){el.setAttribute('contenteditable',on?'true':'false');if(on)el.setAttribute('spellcheck','true');else el.removeAttribute('spellcheck');});
+  }
+  function addRemoveControl(member){
+    if(member.querySelector('.team-member-remove'))return;
+    var remove=document.createElement('button');
+    remove.type='button';remove.className='team-member-remove';remove.textContent='Remove';
+    remove.setAttribute('data-runtime-only','');remove.setAttribute('aria-label','Remove team member');
+    remove.addEventListener('click',function(e){
+      e.preventDefault();e.stopPropagation();
+      var name=(member.querySelector('h3')||{}).textContent||'this team member';
+      if(!window.confirm('Remove '+name.trim()+' from the team section?'))return;
+      pushHistory();
+      member.remove();if(window.__hsRefreshImageTargets)window.__hsRefreshImageTargets();save('Team member removed. Publish to make it live.');
+    });
+    member.appendChild(remove);
+  }
+  function prepare(member){addRemoveControl(member);syncEditable(member);}
+  try{
+    var saved=localStorage.getItem(KEY);
+    var migrating=false;
+    if(!saved){saved=localStorage.getItem(PREVIOUS_KEY);migrating=!!saved;}
+    if(saved&&saved.indexOf('class="member"')>=0)team.innerHTML=saved;
+    if(migrating){
+      var charl=[].slice.call(team.querySelectorAll('.member')).filter(function(member){var heading=member.querySelector('h3');return heading&&heading.textContent.trim()==='Charl Kruger';})[0];
+      if(charl){charl.querySelector('.role').textContent='CO-FOUNDER & HEAD OF DIGITAL SYSTEMS';charl.querySelector('p').textContent='Leads HydroSense’s digital signal processing and embedded software development, building the firmware and signal-processing systems that turn raw sensor data into reliable water-quality measurements.';}
+      else{team.innerHTML=sourceMarkup;}
+      localStorage.setItem(KEY,cleanMarkup());
+    }
+    if(!saved){
+      var currentCharl=[].slice.call(team.querySelectorAll('.member')).filter(function(member){var heading=member.querySelector('h3');return heading&&heading.textContent.trim()==='Charl Kruger';})[0];
+      if(currentCharl){currentCharl.querySelector('.role').textContent='CO-FOUNDER & HEAD OF DIGITAL SYSTEMS';currentCharl.querySelector('p').textContent='Leads HydroSense’s digital signal processing and embedded software development, building the firmware and signal-processing systems that turn raw sensor data into reliable water-quality measurements.';localStorage.setItem(KEY,cleanMarkup());}
+    }
+    localStorage.removeItem('hs_team_members_markup');
+    localStorage.removeItem(PREVIOUS_KEY);
+    undoStack=JSON.parse(sessionStorage.getItem(HISTORY_KEY)||'[]');
+    if(!Array.isArray(undoStack))undoStack=[];
+  }catch(e){}
+  team.querySelectorAll('.member').forEach(prepare);
+  updateUndoButtons();
+  function addMember(){
+    if(!document.body.classList.contains('can-edit'))return;
+    pushHistory();
+    var member=document.createElement('div');
+    member.className='member';
+    member.innerHTML='<div class="avatar photo-avatar asset-missing"><span>NM</span></div><h3>New team member</h3><div class="role">Role / title</div><p>Add a short biography describing their expertise and responsibilities.</p>';
+    team.appendChild(member);prepare(member);
+    if(window.__hsRefreshImageTargets)window.__hsRefreshImageTargets();
+    save('Team member added. Edit their text and choose a photo, then publish.');
+    var heading=member.querySelector('h3');if(heading&&document.body.classList.contains('edit-mode')){heading.focus();var selection=window.getSelection();var range=document.createRange();range.selectNodeContents(heading);selection.removeAllRanges();selection.addRange(range);}
+  }
+  function undoTeamChange(){
+    if(!undoStack.length)return;
+    clearTimeout(saveTimer);
+    team.innerHTML=undoStack.pop();persistHistory();
+    team.querySelectorAll('.member').forEach(prepare);
+    if(window.__hsRefreshImageTargets)window.__hsRefreshImageTargets();
+    save('Last team change undone. Publish to make it live.');
+  }
+  addButtons.forEach(function(button){button.addEventListener('click',addMember);});
+  undoButtons.forEach(function(button){button.addEventListener('click',undoTeamChange);});
+  team.addEventListener('focusin',function(e){if(e.target.matches&&e.target.matches('h3,.role,p')){editSnapshot=cleanMarkup();editChanged=false;}});
+  team.addEventListener('focusout',function(e){if(e.target.matches&&e.target.matches('h3,.role,p')){editSnapshot=null;editChanged=false;}});
+  team.addEventListener('input',function(e){if(e.target.closest&&e.target.closest('.member')){if(!editChanged){pushHistory(editSnapshot||cleanMarkup());editChanged=true;}scheduleSave();}});
+  document.addEventListener('hs:image-changed',scheduleSave);
+  document.addEventListener('hs:team-refresh-controls',function(){team.querySelectorAll('.member').forEach(prepare);});
 })();
 </script>
 
@@ -1216,7 +1431,6 @@ function validEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}document.que
     });
     handle.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();});
   }
-  avatars.forEach(installAvatarHandle);
   function setMode(on){
     targets.forEach(function(target){
       if(on){
@@ -1244,7 +1458,10 @@ function validEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}document.que
     input.value='';
     input.click();
   }
-  avatars.forEach(function(avatar){
+  function bindAvatar(avatar){
+    if(avatar.dataset.photoEditorBound==='1')return;
+    avatar.dataset.photoEditorBound='1';
+    installAvatarHandle(avatar);
     avatar.addEventListener('pointerdown',function(e){
       var r=avatar.getBoundingClientRect();
       suppressClick=(e.clientX>=r.right-30&&e.clientY>=r.bottom-30);
@@ -1256,7 +1473,8 @@ function validEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}document.que
     avatar.addEventListener('keydown',function(e){
       if(e.key==='Enter'||e.key===' '){e.preventDefault();choose(avatar);}
     });
-  });
+  }
+  avatars.forEach(bindAvatar);
   logos.forEach(function(logo){
     logo.addEventListener('pointerdown',function(e){
       var r=logo.getBoundingClientRect();
@@ -1307,6 +1525,7 @@ function validEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}document.que
           var img=(isLogo||isDashboard)?node:node.querySelector('img');
           if(!img){img=document.createElement('img');node.insertBefore(img,node.firstChild);}
           img.src=data;
+          if(!isLogo&&!isDashboard){var member=node.closest('.member'),heading=member&&member.querySelector('h3');img.alt=heading?heading.textContent.trim():'Team member';img.setAttribute('loading','lazy');}
           img.removeAttribute('data-srcs');
           img.removeAttribute('data-idx');
           img.removeAttribute('onerror');
@@ -1329,6 +1548,13 @@ function validEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}document.que
   });
   window.__hsSetImagePickMode=setMode;
   window.__hsChooseDashboardImage=function(){if(dashboardImage)choose(dashboardImage,true);};
+  window.__hsRefreshImageTargets=function(){
+    avatars=[].slice.call(document.querySelectorAll('.member .photo-avatar'));
+    targets=avatars.concat(logos,dashboardImage?[dashboardImage]:[]);
+    avatars.forEach(bindAvatar);
+    restoreImageSizes();
+    setMode(document.body.classList.contains('photo-edit-mode'));
+  };
   setMode(document.body.classList.contains('photo-edit-mode'));
 })();
 </script>
@@ -1463,6 +1689,7 @@ function validEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}document.que
   var list=document.getElementById('sectionOrderList');
   var reset=document.getElementById('sectionOrderReset');
   var status=document.getElementById('sectionOrderStatus');
+  var statsVisible=document.getElementById('statsVisible');
   if(!list) return;
 
   var SECTIONS=[
@@ -1471,6 +1698,7 @@ function validEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}document.que
     {id:'mission',label:'Mission and values',group:['mission']},
     {id:'how',label:'Animated survey story',group:['how']},
     {id:'why',label:'Why Hydro-Sense',group:['why']},
+    {id:'stats',label:'Headline statistics banner',group:['stats']},
     {id:'unique',label:'Platform',group:['unique']},
     {id:'story',label:'Mission log',group:['story']},
     {id:'team',label:'Team',group:['team']},
@@ -1632,7 +1860,9 @@ function validEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}document.que
       item.addEventListener('drop',function(e){e.preventDefault();item.classList.remove('over');var src=draggingId;try{src=e.dataTransfer.getData('text/plain')||src;}catch(err){} if(src) moveBefore(src,id);});
       list.appendChild(item);
     });
+    if(statsVisible)statsVisible.checked=!isHidden('stats');
   }
+  if(statsVisible)statsVisible.addEventListener('change',function(){setVisibility('stats',statsVisible.checked);});
   if(reset) reset.addEventListener('click',function(){applyOrder(DEFAULT_ORDER);setStatus('Section order reset. Publish to GitHub to make it live.');});
   if(!restoreState()){syncNavVisibility();render();}
 })();
@@ -1766,6 +1996,7 @@ function validEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}document.que
       el.removeAttribute('aria-label');
       el.removeAttribute('title');
       el.removeAttribute('draggable');
+      el.removeAttribute('data-photo-editor-bound');
       el.classList.remove('image-uploaded');
     });
     if(window.__hsDefaultRouteD){
