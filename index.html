@@ -709,7 +709,7 @@ body.can-edit .team-member-remove{display:inline-flex}
 
     <div class="gh-block edit-only" data-no-edit="">
       <h4>Publish to GitHub</h4>
-      <p class="gh-hint">Publishing commits the current cleaned page to the branch/path below. The token is never written into the committed HTML.</p>
+      <p class="gh-hint">Publishing commits the current cleaned page to the branch/path below. Entering a new branch name creates it from the repository's default branch. The token is never written into the committed HTML.</p>
       <div class="gh-row"><input id="ghOwner" type="text" placeholder="owner" value="Hydrosense-technologies" spellcheck="false"><input id="ghRepo" type="text" placeholder="repo" value="hydrosense-website" spellcheck="false"></div>
       <div class="gh-row"><input id="ghBranch" type="text" placeholder="branch" value="experimental" spellcheck="false"><input id="ghPath" type="text" placeholder="path" value="index.html" spellcheck="false"></div>
       <label class="setting-row"><span>Auto-publish on edit<small>Commit ~2.5s after you stop editing</small></span><input id="ghAuto" type="checkbox"></label>
@@ -853,7 +853,12 @@ if(qPrev)qPrev.addEventListener('click',function(){setQuote(quoteIndex-1);});
 if(qReset)qReset.addEventListener('click',function(){setQuote(0);});
 if(headline)headline.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();headline.blur();}});
 if(lede)lede.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();lede.blur();}});
-setQuote(0);
+var matchingQuote=-1;
+if(headline&&lede){
+  matchingQuote=quoteOptions.findIndex(function(option){return option.h===headline.innerHTML&&option.p===lede.textContent;});
+}
+if(matchingQuote>=0){quoteIndex=matchingQuote;if(quoteCount)quoteCount.textContent=(quoteIndex+1)+' / '+quoteOptions.length;}
+else if(quoteCount){quoteCount.textContent='Custom';}
 
 var ham=document.getElementById("hamburger"),mob=document.getElementById("mobileNav"),scrim=document.getElementById("scrim"),siteHeader=document.getElementById("header");
 function syncHeaderHeight(){if(siteHeader)document.documentElement.style.setProperty("--header-height",siteHeader.offsetHeight+"px");}
@@ -1193,8 +1198,8 @@ function validEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}document.que
   sectionTools.appendChild(sectionAdd);sectionTools.appendChild(sectionUndo);team.parentNode.insertBefore(sectionTools,team);
   var addButtons=[add,sectionAdd];
   var undoButtons=[undo,sectionUndo];
-  var KEY='hs_team_members_markup_v3';
-  var PREVIOUS_KEY='hs_team_members_markup_v2';
+  var KEY='hs_team_members_markup_v4';
+  var PREVIOUS_KEYS=['hs_team_members_markup_v3','hs_team_members_markup_v2'];
   var HISTORY_KEY='hs_team_undo_history_v2';
   var undoStack=[];
   var saveTimer=null;
@@ -1245,20 +1250,20 @@ function validEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}document.que
   try{
     var saved=localStorage.getItem(KEY);
     var migrating=false;
-    if(!saved){saved=localStorage.getItem(PREVIOUS_KEY);migrating=!!saved;}
+    if(!saved){for(var previousIndex=0;previousIndex<PREVIOUS_KEYS.length&&!saved;previousIndex++){saved=localStorage.getItem(PREVIOUS_KEYS[previousIndex]);migrating=!!saved;}}
     if(saved&&saved.indexOf('class="member"')>=0)team.innerHTML=saved;
     if(migrating){
       var charl=[].slice.call(team.querySelectorAll('.member')).filter(function(member){var heading=member.querySelector('h3');return heading&&heading.textContent.trim()==='Charl Kruger';})[0];
-      if(charl){charl.querySelector('.role').textContent='CO-FOUNDER & HEAD OF DIGITAL SYSTEMS';charl.querySelector('p').textContent='Leads HydroSense’s digital signal processing and embedded software development, building the firmware and signal-processing systems that turn raw sensor data into reliable water-quality measurements.';}
+      if(charl){charl.querySelector('.role').textContent='CO-FOUNDER & HEAD OF DIGITAL SYSTEMS';charl.querySelector('p').textContent="Leads HydroSense's digital signal processing and embedded software development, building the firmware and signal-processing systems that turn raw sensor data into reliable water-quality measurements.";}
       else{team.innerHTML=sourceMarkup;}
       localStorage.setItem(KEY,cleanMarkup());
     }
     if(!saved){
       var currentCharl=[].slice.call(team.querySelectorAll('.member')).filter(function(member){var heading=member.querySelector('h3');return heading&&heading.textContent.trim()==='Charl Kruger';})[0];
-      if(currentCharl){currentCharl.querySelector('.role').textContent='CO-FOUNDER & HEAD OF DIGITAL SYSTEMS';currentCharl.querySelector('p').textContent='Leads HydroSense’s digital signal processing and embedded software development, building the firmware and signal-processing systems that turn raw sensor data into reliable water-quality measurements.';localStorage.setItem(KEY,cleanMarkup());}
+      if(currentCharl){currentCharl.querySelector('.role').textContent='CO-FOUNDER & HEAD OF DIGITAL SYSTEMS';currentCharl.querySelector('p').textContent="Leads HydroSense's digital signal processing and embedded software development, building the firmware and signal-processing systems that turn raw sensor data into reliable water-quality measurements.";localStorage.setItem(KEY,cleanMarkup());}
     }
     localStorage.removeItem('hs_team_members_markup');
-    localStorage.removeItem(PREVIOUS_KEY);
+    PREVIOUS_KEYS.forEach(function(previousKey){localStorage.removeItem(previousKey);});
     undoStack=JSON.parse(sessionStorage.getItem(HISTORY_KEY)||'[]');
     if(!Array.isArray(undoStack))undoStack=[];
   }catch(e){}
@@ -2016,15 +2021,50 @@ function validEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}document.que
   window.__serializeForPublish=serialize;
 
   var busy=false,queued=false;
+  function branchRefUrl(o,r,br){
+    return API+'/repos/'+encodeURIComponent(o)+'/'+encodeURIComponent(r)+'/git/ref/heads/'+br.split('/').map(encodeURIComponent).join('/');
+  }
+  function validateBranchName(br){
+    return !!br&&!/^\.|\.$|^\/|\/$|\.\.|@\{|[~^:?*\[\\\s]|\.lock(?:\/|$)/.test(br);
+  }
+  function ensureBranch(o,r,br){
+    return gh(branchRefUrl(o,r,br)).then(function(res){
+      if(res.ok)return res.json().then(function(){return false;});
+      if(res.status!==404)return jsonOrThrow(res,'branch');
+      setPublishStatus('busy','Creating branch '+br+'…');
+      var repoUrl=API+'/repos/'+encodeURIComponent(o)+'/'+encodeURIComponent(r);
+      return gh(repoUrl).then(function(repoRes){return jsonOrThrow(repoRes,'repo');}).then(function(repoData){
+        var defaultBranch=repoData.default_branch;
+        if(!defaultBranch)throw new Error('The repository has no default branch.');
+        return gh(branchRefUrl(o,r,defaultBranch)).then(function(refRes){return jsonOrThrow(refRes,'default branch');});
+      }).then(function(defaultRef){
+        var sha=defaultRef&&defaultRef.object&&defaultRef.object.sha;
+        if(!sha)throw new Error('Could not find the default branch commit.');
+        return gh(repoUrl+'/git/refs',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ref:'refs/heads/'+br,sha:sha})});
+      }).then(function(createRes){
+        if(createRes.ok)return createRes.json().then(function(){return true;});
+        if(createRes.status===422){
+          return gh(branchRefUrl(o,r,br)).then(function(recheck){if(recheck.ok)return false;return jsonOrThrow(createRes,'create branch');});
+        }
+        return jsonOrThrow(createRes,'create branch');
+      });
+    });
+  }
   function doPublish(isAuto){
     var br=branch.value.trim(),pa=path.value.trim().replace(/^\/+/,''),o=owner.value.trim(),r=repo.value.trim();
     if(!br||!pa){setPublishStatus('err','Fill in branch and path.');return;}
+    if(!validateBranchName(br)){setPublishStatus('err','Enter a valid Git branch name.');return;}
     if(busy){queued=true;return;}
     busy=true;saveConfig();saveToken();
     setPublishStatus('busy',(isAuto?'Auto-':'')+'Publishing…');
     var base=API+'/repos/'+encodeURIComponent(o)+'/'+encodeURIComponent(r)+'/contents/'+pa.split('/').map(encodeURIComponent).join('/');
     var content=utf8b64(serialize());
-    gh(base+'?ref='+encodeURIComponent(br)).then(function(res){
+    var createdBranch=false;
+    ensureBranch(o,r,br).then(function(created){
+      createdBranch=created;
+      setPublishStatus('busy',(isAuto?'Auto-':'')+'Publishing…');
+      return gh(base+'?ref='+encodeURIComponent(br));
+    }).then(function(res){
       if(res.status===200)return res.json().then(function(j){return j.sha;});
       if(res.status===404)return null;
       return res.text().then(function(x){throw new Error('read '+res.status+' '+x.slice(0,140));});
@@ -2034,7 +2074,7 @@ function validEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}document.que
       return gh(base,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     }).then(function(res){return res.json().then(function(j){return{ok:res.ok,st:res.status,j:j};});})
     .then(function(res){
-      if(res.ok){setPublishStatus('ok','Published to '+br+' ✓  '+new Date().toLocaleTimeString());}
+      if(res.ok){setPublishStatus('ok',(createdBranch?'Created and published to ':'Published to ')+br+' ✓  '+new Date().toLocaleTimeString());}
       else{setPublishStatus('err','Failed ('+res.st+'): '+String((res.j&&res.j.message)||'').slice(0,140));}
     }).catch(function(e){setPublishStatus('err','Error: '+e.message);})
     .then(function(){busy=false;if(queued){queued=false;setTimeout(function(){publish(true);},500);}});
