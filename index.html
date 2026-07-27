@@ -1168,13 +1168,6 @@ function validEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}document.que
       toggle.setAttribute('aria-expanded',open?'true':'false');
       try{localStorage.setItem('hs_editor_panel_open',open?'1':'0');}catch(e){}
     });
-    document.addEventListener('click',function(e){
-      if(panel.hasAttribute('hidden'))return;
-      var settings=document.getElementById('siteSettings');
-      var path=e.composedPath?e.composedPath():[];
-      var startedInside=path.indexOf(settings)>=0||(e.target.closest&&e.target.closest('#siteSettings'));
-      if(!startedInside){panel.setAttribute('hidden','');toggle.setAttribute('aria-expanded','false');try{localStorage.setItem('hs_editor_panel_open','0');}catch(err){}}
-    });
   }
   if(editableToggle) editableToggle.addEventListener('change',function(){setEditable(editableToggle.checked);});
   if(editBtn) editBtn.addEventListener('click',function(){setEditable(!document.body.classList.contains('edit-mode'));});
