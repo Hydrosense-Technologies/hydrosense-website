@@ -654,6 +654,8 @@ body.brand-mode [contenteditable="true"]:hover{background:rgba(170,229,248,.12)!
 .team-member-remove{display:none;position:absolute;right:.35rem;top:.35rem;z-index:8;border:1px solid rgba(179,64,47,.35);border-radius:999px;background:rgba(255,255,255,.94);color:#a73727;padding:.38rem .65rem;font:750 .7rem var(--sans);cursor:pointer;box-shadow:0 8px 20px -14px rgba(11,28,38,.6)}
 body.can-edit .team-member-remove{display:inline-flex}
 .team-member-remove:hover{background:#fff0ed;border-color:#b3402f}
+.team{grid-template-columns:repeat(var(--team-columns,3),minmax(0,1fr))}
+@media(max-width:1100px) and (min-width:901px){.team{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}}
 @media(max-width:520px){.stat-style-grid{grid-template-columns:1fr}}
 
 </style>
@@ -1288,6 +1290,10 @@ function validEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}document.que
     if(window.__hsSchedulePublish)window.__hsSchedulePublish();
   }
   function scheduleSave(){clearTimeout(saveTimer);saveTimer=setTimeout(function(){save('Team changes saved locally. Publish to make them live.');},350);}
+  function syncTeamLayout(){
+    var count=team.querySelectorAll('.member').length;
+    team.style.setProperty('--team-columns',String(Math.max(1,Math.min(4,count))));
+  }
   function editableFields(member){return member.querySelectorAll('h3,.role,p');}
   function syncEditable(member){
     var on=document.body.classList.contains('edit-mode');
@@ -1303,7 +1309,7 @@ function validEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}document.que
       var name=(member.querySelector('h3')||{}).textContent||'this team member';
       if(!window.confirm('Remove '+name.trim()+' from the team section?'))return;
       pushHistory();
-      member.remove();if(window.__hsRefreshImageTargets)window.__hsRefreshImageTargets();save('Team member removed. Publish to make it live.');
+      member.remove();syncTeamLayout();if(window.__hsRefreshImageTargets)window.__hsRefreshImageTargets();save('Team member removed. Publish to make it live.');
     });
     member.appendChild(remove);
   }
@@ -1329,14 +1335,19 @@ function validEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}document.que
     if(!Array.isArray(undoStack))undoStack=[];
   }catch(e){}
   team.querySelectorAll('.member').forEach(prepare);
+  syncTeamLayout();
   updateUndoButtons();
   function addMember(){
     if(!document.body.classList.contains('can-edit'))return;
     pushHistory();
+    var peerAvatar=team.querySelector('.member .photo-avatar');
+    var peerWidth=peerAvatar?Math.round(peerAvatar.getBoundingClientRect().width):76;
     var member=document.createElement('div');
     member.className='member';
     member.innerHTML='<div class="avatar photo-avatar asset-missing"><span>NM</span></div><h3>New team member</h3><div class="role">Role / title</div><p>Add a short biography describing their expertise and responsibilities.</p>';
-    team.appendChild(member);prepare(member);
+    team.appendChild(member);prepare(member);syncTeamLayout();
+    var newAvatar=member.querySelector('.photo-avatar');
+    if(newAvatar)newAvatar.style.width=Math.max(52,peerWidth)+'px';
     if(window.__hsRefreshImageTargets)window.__hsRefreshImageTargets();
     save('Team member added. Edit their text and choose a photo, then publish.');
     var heading=member.querySelector('h3');if(heading&&document.body.classList.contains('edit-mode')){heading.focus();var selection=window.getSelection();var range=document.createRange();range.selectNodeContents(heading);selection.removeAllRanges();selection.addRange(range);}
@@ -1346,6 +1357,7 @@ function validEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}document.que
     clearTimeout(saveTimer);
     team.innerHTML=undoStack.pop();persistHistory();
     team.querySelectorAll('.member').forEach(prepare);
+    syncTeamLayout();
     if(window.__hsRefreshImageTargets)window.__hsRefreshImageTargets();
     save('Last team change undone. Publish to make it live.');
   }
