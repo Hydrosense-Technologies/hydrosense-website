@@ -228,6 +228,13 @@ footer .official-logo{height:48px;width:48px;max-width:none}
 body.edit-mode [contenteditable="true"]{cursor:text}
 body.edit-mode [contenteditable="true"]:empty:before{content:"Type here";color:rgba(95,122,134,.62)}
 body:not(.edit-mode) [contenteditable="true"]{box-shadow:none!important;background:transparent!important}
+.text-size-controls{margin:.15rem 0 .85rem;padding:.85rem;border:1px solid var(--hair);border-radius:12px;background:var(--card)}
+.text-size-controls h4{margin:0 0 .2rem}.text-size-controls p{margin:0 0 .65rem}
+.text-size-controls label{display:flex;align-items:center;justify-content:space-between;gap:.75rem;margin:0;color:var(--ink)}
+.text-size-controls output{font-variant-numeric:tabular-nums;color:var(--cyan-deep);font-weight:800}
+.text-size-controls input[type="range"]{display:block;width:100%;height:30px;margin:.35rem 0 .55rem;padding:0;border:0;background:transparent;accent-color:var(--cyan);box-shadow:none}
+.text-size-controls .edit-btn{margin:0}
+body.edit-mode .font-resize-selected{box-shadow:0 0 0 3px rgba(10,166,189,.34)!important;background:rgba(10,166,189,.08)!important}
 
 body.dark-mode{--paper:#07141c;--sand:#091923;--ink:#eaf7fb;--ink-2:#c7dce5;--mut:#8caab6;--hair:#193442;--hair-2:#254a5b;--card:#0d1f2a;--cyan:#20c6df;--cyan-deep:#72e1f1;--cyan-soft:#7fe8f5;background:#07141c;color:#eaf7fb}
 body.dark-mode main,body.dark-mode .hero{background:#07141c!important}
@@ -676,6 +683,13 @@ body.can-edit .team-member-remove{display:inline-flex}
       <button class="edit-btn active" id="editBtn" type="button" aria-pressed="true">✓ Text editing on</button>
       <button class="edit-btn" id="photoEditBtn" type="button" aria-pressed="false">▧ Edit photos</button>
       <label class="setting-row"><span>Editable text<small>Click page copy and type directly</small></span><input id="editableToggle" type="checkbox"></label>
+      <div class="text-size-controls" id="textSizeControls" data-no-edit>
+        <h4>Text size</h4>
+        <p id="textSizeTarget">Turn on text editing, then select any page text.</p>
+        <label for="textSizeRange"><span>Selected text</span><output id="textSizeOutput">—</output></label>
+        <input id="textSizeRange" type="range" min="8" max="120" step="1" value="16" disabled>
+        <button class="edit-btn active" id="textSizeReset" type="button" disabled>Reset selected size</button>
+      </div>
       <label class="setting-row"><span>Colour palette<small>Light, dark or brand-guideline blue</small></span><select id="themeMode" class="contact-layout-select"><option value="light">Light</option><option value="dark">Dark</option><option value="brand" selected="selected">Brand blue</option></select></label>
       <label class="setting-row"><span>Contact layout<small>Static form or Contact us overlay</small></span><select id="contactLayoutMode" class="contact-layout-select"><option value="fullscreen" selected="selected">Contact us overlay</option><option value="static">Static form</option></select></label>
       <label class="setting-row"><span>Survey path<small>Route used in the animated catchment</small></span><select id="routePatternEditor" class="contact-layout-select" aria-label="Survey path"><option value="current">Current route</option><option value="lawnmower" selected="selected">Lawn-mower route</option></select></label>
@@ -1015,6 +1029,11 @@ function validEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}document.que
   var editBtn=document.getElementById('editBtn');
   var photoEditBtn=document.getElementById('photoEditBtn');
   var themeSelect=document.getElementById('themeMode');
+  var textSizeRange=document.getElementById('textSizeRange');
+  var textSizeOutput=document.getElementById('textSizeOutput');
+  var textSizeTarget=document.getElementById('textSizeTarget');
+  var textSizeReset=document.getElementById('textSizeReset');
+  var selectedTextNode=null;
   var heroKick=document.querySelector('.hero .kick');
   if(heroKick&&!heroKick.querySelector('.kick-text')){
     var heroKickText=document.createElement('span');
@@ -1031,11 +1050,13 @@ function validEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}document.que
     '.hero .kick-text','.hero h1','.hero .lede','.hero-cta a','.hero-meta b','.hero-meta span',
     '.section-head .kick','.section-head h2','.section-head p','.benefit h3','.benefit p','.figures b','.figures span',
     '.panel .label','.panel h2','.panel p','.telemetry span',
+    '.stage-title h2','.stage-title p','.scroll-meter span','.route-selector label',
     '.dash-top b','.dash-top span','.metric span','.metric b','.metric small','.dash-note',
     '.exp-btn h3','.exp-body-inner > p','.role-card h3','.role-card p','.role-tags span',
     '.mlog-entry .yr','.mlog-entry h3','.mlog-entry p',
     '.member h3','.member .role','.member p',
     '.contact-grid .kick','.contact-grid h2','.contact-grid p','.info-row a',
+    '.contact-card h2','.contact-card h3','.contact-card label','.contact-card .btn','.form-status',
     '.investors-section .kick','.investors-section h2','.investors-section .lede','.investor-card span','.investor-card h3','.investor-card p','.investor-actions a','.investor-note',
     'footer span','footer a','footer .brand-word b','footer .brand-word small',
     '.edit-hint'
@@ -1051,6 +1072,48 @@ function validEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}document.que
       return el && (el.matches('.ticker-item')||!el.closest('.site-settings,[data-no-edit],script,style,svg,form,input,textarea,select'));
     });
   }
+  function textTargetName(el){
+    var text=(el.textContent||'').replace(/\s+/g,' ').trim();
+    return text?('Selected: '+text.slice(0,52)+(text.length>52?'…':'')):'Selected text';
+  }
+  function selectTextNode(el){
+    if(selectedTextNode)selectedTextNode.classList.remove('font-resize-selected');
+    selectedTextNode=el&&el.matches&&el.matches(editSelector)&&!el.closest('.site-settings,[data-no-edit]')?el:null;
+    if(!selectedTextNode){
+      if(textSizeRange)textSizeRange.disabled=true;
+      if(textSizeReset)textSizeReset.disabled=true;
+      if(textSizeOutput)textSizeOutput.textContent='—';
+      if(textSizeTarget)textSizeTarget.textContent='Turn on text editing, then select any page text.';
+      return;
+    }
+    selectedTextNode.classList.add('font-resize-selected');
+    var size=Math.round(parseFloat(getComputedStyle(selectedTextNode).fontSize)||16);
+    if(textSizeRange){textSizeRange.disabled=false;textSizeRange.value=Math.max(8,Math.min(120,size));}
+    if(textSizeReset)textSizeReset.disabled=false;
+    if(textSizeOutput)textSizeOutput.textContent=size+' px';
+    if(textSizeTarget)textSizeTarget.textContent=textTargetName(selectedTextNode);
+  }
+  document.addEventListener('focusin',function(e){if(document.body.classList.contains('edit-mode'))selectTextNode(e.target);});
+  document.addEventListener('pointerdown',function(e){
+    if(!document.body.classList.contains('edit-mode')||e.target.closest('.site-settings'))return;
+    var target=e.target.closest('[contenteditable="true"]');
+    if(target)selectTextNode(target);
+  });
+  if(textSizeRange)textSizeRange.addEventListener('input',function(){
+    if(!selectedTextNode)return;
+    var size=parseInt(textSizeRange.value,10);
+    selectedTextNode.style.setProperty('font-size',size+'px','important');
+    if(textSizeOutput)textSizeOutput.textContent=size+' px';
+    if(window.__hsSchedulePublish)window.__hsSchedulePublish();
+  });
+  if(textSizeReset)textSizeReset.addEventListener('click',function(){
+    if(!selectedTextNode)return;
+    selectedTextNode.style.removeProperty('font-size');
+    var size=Math.round(parseFloat(getComputedStyle(selectedTextNode).fontSize)||16);
+    if(textSizeRange)textSizeRange.value=Math.max(8,Math.min(120,size));
+    if(textSizeOutput)textSizeOutput.textContent=size+' px';
+    if(window.__hsSchedulePublish)window.__hsSchedulePublish();
+  });
   var tickerItems=Array.prototype.slice.call(document.querySelectorAll('.ticker-item'));
   if(tickerItems.length&&tickerItems.length%2===0){
     var tickerHalf=tickerItems.length/2;
@@ -1071,6 +1134,7 @@ function validEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}document.que
     });
     if(editableToggle) editableToggle.checked=on;
     if(editBtn){editBtn.textContent=on?'✓ Text editing on':'✎ Edit text';editBtn.classList.toggle('active',on);editBtn.setAttribute('aria-pressed',on?'true':'false');}
+    if(!on)selectTextNode(null);
   }
   function setPhotoEditing(on){
     if(on && !document.body.classList.contains('can-edit')){
@@ -2000,6 +2064,7 @@ function validEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}document.que
       });
     });
     root.querySelectorAll('[contenteditable]').forEach(function(el){el.setAttribute('contenteditable','false');el.removeAttribute('spellcheck');});
+    root.querySelectorAll('.font-resize-selected').forEach(function(el){el.classList.remove('font-resize-selected');});
     root.querySelectorAll('[data-runtime-only]').forEach(function(el){el.remove();});
     root.querySelectorAll('.photo-avatar,.official-logo,.dashboard-image').forEach(function(el){
       el.removeAttribute('tabindex');
