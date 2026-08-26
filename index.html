@@ -674,6 +674,7 @@ body.brand-mode [contenteditable="true"]:hover{background:rgba(170,229,248,.12)!
 body.can-edit .team-member-remove{display:inline-flex}
 .team-member-remove:hover{background:#fff0ed;border-color:#b3402f}
 .team{grid-template-columns:repeat(var(--team-columns,3),minmax(0,1fr))}
+.contact-section .info-row:has(a[href^="mailto:"]){display:none}
 @media(max-width:1100px) and (min-width:901px){.team{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}}
 @media(max-width:520px){.stat-style-grid{grid-template-columns:1fr}}
 
