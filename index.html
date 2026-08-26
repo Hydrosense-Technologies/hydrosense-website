@@ -675,6 +675,32 @@ body.can-edit .team-member-remove{display:inline-flex}
 .team-member-remove:hover{background:#fff0ed;border-color:#b3402f}
 .team{grid-template-columns:repeat(var(--team-columns,3),minmax(0,1fr))}
 .contact-section .info-row:has(a[href^="mailto:"]){display:none}
+@media(max-width:640px){
+  .catchment-stage{
+    display:grid;
+    grid-template-rows:minmax(220px,42%) minmax(0,58%);
+    height:calc(100svh - var(--header-height,66px));
+    min-height:0;
+  }
+  .catchment-stage .map-svg{
+    position:relative;
+    inset:auto;
+    width:100%;
+    height:100%;
+    grid-row:1;
+  }
+  .catchment-stage .panel{
+    position:relative;
+    inset:auto;
+    grid-row:2;
+    align-self:start;
+    width:calc(100% - 2rem);
+    max-height:calc(100% - 2rem);
+    margin:1rem;
+    overflow:auto;
+    transform:none;
+  }
+}
 @media(max-width:1100px) and (min-width:901px){.team{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}}
 @media(max-width:520px){.stat-style-grid{grid-template-columns:1fr}}
 
@@ -949,8 +975,8 @@ function ease(t){t=clamp(t);return t*t*(3-2*t);}
 function setMapView(center,zoomT){
   if(!mapSvg)return;
   zoomT=ease(zoomT);
-  var stage=document.querySelector(".catchment-stage");
-  var ratio=((stage&&stage.clientWidth)||innerWidth)/Math.max(1,((stage&&stage.clientHeight)||innerHeight));
+  var mapRect=mapSvg.getBoundingClientRect();
+  var ratio=(mapRect.width||innerWidth)/Math.max(1,(mapRect.height||innerHeight));
   var worldW=2600, worldH=900;
   var h=mix(900,650,zoomT),w=h*ratio;
   /* Initial view is the lake/catchment. During uplink we pan across a much wider SVG world, so the ping actually leaves the catchment screen. */
